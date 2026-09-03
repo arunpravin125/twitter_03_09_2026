@@ -8,7 +8,18 @@ dotenv.config();
 app.use(express.json());
 const PORT = ENV.PORT || 3011;
 
-app.listen(PORT, () => {
-  console.log("Server started...", PORT);
-  connectMongoose();
-});
+app.get("/", (req, res) => res.send("Hellow from Server"));
+
+const startServer = async () => {
+  await connectMongoose();
+  try {
+    app.listen(PORT, () => {
+      console.log("Server started...", PORT);
+    });
+  } catch (error) {
+    console.log("error in start server", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
