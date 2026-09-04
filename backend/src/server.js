@@ -47,7 +47,7 @@ if (missingClerkEnv.length === 0) {
 
 app.use(arcjetMiddleware);
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.send("Hellow from Server");
 });
 
