@@ -5,6 +5,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { ENV } from "./config/env.js";
 import cors from "cors";
 import { userRoutes } from "./routes/user.route.js";
+import { postRoutes } from "./routes/post.route.js";
 
 const app = express();
 dotenv.config();
@@ -16,6 +17,14 @@ const PORT = ENV.PORT || 3011;
 app.get("/", (req, res) => res.send("Hellow from Server"));
 
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
+
+//  error handling middleware
+
+app.use((error, req, res) => {
+  console.error("Unhandled error:", error);
+  res.status(500).json({ error: err.message || "Internal server error" });
+});
 
 const startServer = async () => {
   await connectMongoose();
