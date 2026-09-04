@@ -6,6 +6,7 @@ import { ENV } from "./config/env.js";
 import cors from "cors";
 import { userRoutes } from "./routes/user.route.js";
 import { postRoutes } from "./routes/post.route.js";
+import { commentRoutes } from "./routes/comment.route.js";
 
 const app = express();
 dotenv.config();
@@ -18,10 +19,11 @@ app.get("/", (req, res) => res.send("Hellow from Server"));
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/comments", commentRoutes);
 
 //  error handling middleware
 
-app.use((error, req, res) => {
+app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);
   res.status(500).json({ error: err.message || "Internal server error" });
 });
