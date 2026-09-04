@@ -33,11 +33,13 @@ app.use((error, req, res, next) => {
 });
 
 const startServer = async () => {
-  await connectMongoose();
   try {
-    app.listen(PORT, () => {
-      console.log("Server started...", PORT);
-    });
+    await connectMongoose();
+    if (ENV.NODE_ENV !== "production") {
+      app.listen(ENV.PORT, () => {
+        console.log("Server started...", ENV.PORT);
+      });
+    }
   } catch (error) {
     console.log("error in start server", error.message);
     process.exit(1);
@@ -45,3 +47,6 @@ const startServer = async () => {
 };
 
 startServer();
+
+// export for vercel
+export default app;
