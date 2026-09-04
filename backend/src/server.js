@@ -9,7 +9,7 @@ import { commentRoutes } from "./routes/comment.route.js";
 import { notificationRoutes } from "./routes/notification.route.js";
 import { arcjetMiddleware } from "./middlewares/arcjet.middleware.js";
 
-const app = express();
+export const app = express();
 
 const PORT = ENV.PORT || 3011;
 const missingClerkEnv = [];
@@ -93,5 +93,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-export default app;
