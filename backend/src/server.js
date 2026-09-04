@@ -1,5 +1,4 @@
 import express from "express";
-import dotenv from "dotenv";
 import { connectMongoose } from "./config/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import { ENV } from "./config/env.js";
@@ -11,10 +10,6 @@ import { notificationRoutes } from "./routes/notification.route.js";
 import { arcjetMiddleware } from "./middlewares/arcjet.middleware.js";
 
 const app = express();
-
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config();
-}
 
 const PORT = ENV.PORT || 3011;
 const missingClerkEnv = [];
