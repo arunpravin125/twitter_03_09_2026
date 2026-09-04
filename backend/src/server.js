@@ -47,8 +47,12 @@ if (missingClerkEnv.length === 0) {
 
 app.use(arcjetMiddleware);
 
-app.get("/health", (req, res) => {
-  res.send("Hellow from Server");
+app.get(["/", "/health"], (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Hellow from Server",
+    timestamp: new Date().toISOString(),
+  });
 });
 
 app.use("/api/users", userRoutes);
