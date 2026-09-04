@@ -29,15 +29,22 @@ app.use("/api/notification", notificationRoutes);
 
 app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);
-  res.status(500).json({ error: err.message || "Internal server error" });
+  res.status(500).json({
+    error: error?.message || "Internal server error",
+  });
 });
 
 const startServer = async () => {
   try {
-    await connectMongoose();
-    if (ENV.NODE_ENV !== "production") {
-      app.listen(ENV.PORT, () => {
-        console.log("Server started...", ENV.PORT);
+    if (ENV.MONGO_URI) {
+      await connectMongoose();
+    } else {
+      console.warn("MongoDB URI missing. Running without DB connection.");
+    }
+
+    if (ENV.NODE_ENV !== "production" && !process.env.VERCEL) {
+      app.listen(PORT, () => {
+        console.log("Server started...", PORT);
       });
     }
   } catch (error) {

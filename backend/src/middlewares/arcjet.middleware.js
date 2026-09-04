@@ -3,6 +3,10 @@ import { aj } from "../config/arcjet.js";
 //  Arcjet middleware for rate limiting, bot protection, and security
 
 export const arcjetMiddleware = async (req, res, next) => {
+  if (!aj) {
+    return next();
+  }
+
   try {
     const decision = await aj.protect(req, {
       requested: 1,
@@ -18,13 +22,13 @@ export const arcjetMiddleware = async (req, res, next) => {
         });
       } else if (decision.reason.isBot()) {
         return res.status(403).json({
-          errpr: "Bot access denied",
+          error: "Bot access denied",
           message: "Automated requests are not allowed",
         });
       } else {
         return res.status(403).json({
           error: "Forbidden",
-          message: "Acess denied by security policy",
+          message: "Access denied by security policy",
         });
       }
     }
