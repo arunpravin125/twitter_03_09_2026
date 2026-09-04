@@ -32,22 +32,29 @@ if (missingClerkEnv.length > 0) {
 app.use(express.json());
 app.use(cors());
 
+app.use((req, res, next) => {
+  const isHealthCheck = ["/", "/health", "/favicon.ico"].includes(req.path);
+
+  if (missingClerkEnv.length === 0 || isHealthCheck) {
+    return next();
+  }
+
+  return res.status(500).json({
+    error: "Server misconfiguration",
+    message: "Missing required Clerk environment variables.",
+    missingEnv: missingClerkEnv,
+  });
+});
+
 if (missingClerkEnv.length === 0) {
   app.use(clerkMiddleware());
   console.log("Clerk middleware enabled.");
-} else {
-  app.use((req, res, next) => {
-    return res.status(500).json({
-      error: "Server misconfiguration",
-      message: "Missing required Clerk environment variables.",
-      missingEnv: missingClerkEnv,
-    });
-  });
 }
 
 app.use(arcjetMiddleware);
 
 app.get(["/", "/health"], (req, res) => {
+  console.log("Health api");
   res.json({
     status: "ok",
     message: "Hellow from Server",
