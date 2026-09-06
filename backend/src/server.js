@@ -75,7 +75,7 @@ const startServer = async () => {
       await connectMongoose();
       console.log("MongoDB initialization complete.");
     } else {
-      console.warn("MONGODB_URI is not set. Skipping MongoDB connection.");
+      console.warn("MongoDB URI is not set. Skipping MongoDB connection.");
     }
 
     if (!process.env.VERCEL && ENV.NODE_ENV !== "production") {

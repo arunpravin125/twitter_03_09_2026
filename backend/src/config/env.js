@@ -4,10 +4,12 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+
 export const ENV = {
   PORT: process.env.PORT,
   NODE_ENV: process.env.NODE_ENV || "development",
-  MONGO_URI: process.env.MONGODB_URI,
+  MONGO_URI: mongoUri,
   CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
   ARCJET_ENV: process.env.ARCJET_ENV,
