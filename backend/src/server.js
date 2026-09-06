@@ -57,6 +57,15 @@ app.get(["/", "/health"], (req, res) => {
   });
 });
 
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectMongoose();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
@@ -93,3 +102,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+export default app;
