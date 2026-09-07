@@ -115,7 +115,9 @@ export const likePost = asyncHandler(async (req, res) => {
   if (!user || !post)
     return res.status(404).json({ error: "User or post not found" });
 
-  const isLiked = await post.likes.includes(user?._id);
+  const isLiked = post.likes.some(
+    (likeId) => likeId.toString() === user._id.toString(),
+  );
 
   if (isLiked) {
     // unlike
@@ -147,7 +149,7 @@ export const deletePost = asyncHandler(async (req, res) => {
 
   if (!user || !post)
     return res.status(404).json({ error: "User or post not found" });
-  const isUserPostedPost = post.user._id.toString() === user?._id.toString();
+  const isUserPostedPost = post.user.toString() === user._id.toString();
 
   if (!isUserPostedPost) {
     return res.status(400).json({ error: "Posted user have access to delete" });
