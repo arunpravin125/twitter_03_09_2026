@@ -15,7 +15,7 @@ export const getPosts = asyncHandler(async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username fristName lastName profilePciture",
+        select: "username firstName lastName profilePicture",
       },
     });
   if (posts.length > 0) {
@@ -28,12 +28,12 @@ export const getPosts = asyncHandler(async (req, res) => {
 export const getPost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
   const post = await Post.findById(postId)
-    .populate("user", "username firstName lastName profilePciture")
+    .populate("user", "username firstName lastName profilePicture")
     .populate({
       path: "comments",
       populate: {
         path: "user",
-        select: "username firstName lastName profilePciture",
+        select: "username firstName lastName profilePicture",
       },
     });
 
@@ -54,7 +54,7 @@ export const getUserPosts = asyncHandler(async (req, res) => {
       path: "comments",
       populate: {
         path: "user",
-        select: "username fristName lastName profilePicture",
+        select: "username firstName lastName profilePicture",
       },
     });
 
