@@ -32,7 +32,7 @@ export const createComment = asyncHandler(async (req, res) => {
   });
   await addComment.save();
 
-  await Post.findByIdAndUpdate(postId, { $push: { comment: addComment?._id } });
+  await Post.findByIdAndUpdate(postId, { $push: { comments: addComment?._id } });
 
   if (post?.user?.toString() !== user?._id.toString()) {
     await Notification.create({

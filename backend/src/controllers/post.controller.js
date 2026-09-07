@@ -18,6 +18,9 @@ export const getPosts = asyncHandler(async (req, res) => {
         select: "username fristName lastName profilePciture",
       },
     });
+  if (posts.length > 0) {
+    console.log("post is there");
+  }
 
   res.status(200).json({ posts });
 });

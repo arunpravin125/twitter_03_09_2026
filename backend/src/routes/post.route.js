@@ -13,7 +13,7 @@ import upload from "../middlewares/upload.middleware.js";
 export const postRoutes = express.Router();
 
 //  public route
-postRoutes.get("/posts", getPosts);
+postRoutes.get("/", getPosts);
 postRoutes.get("/:postId", getPost);
 postRoutes.get("/user/:username", getUserPosts);
 
