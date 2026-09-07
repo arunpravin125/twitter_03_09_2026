@@ -16,5 +16,5 @@ userRoutes.post("/profile/:username", getUserProfile);
 // private routes
 userRoutes.post("/profile", protectRoute, updateProfile);
 userRoutes.post("/sync", protectRoute, syncUser);
-userRoutes.post("/me", protectRoute, getCurrentUser);
+userRoutes.get("/me", protectRoute, getCurrentUser);
 userRoutes.post("/follow/:targetUserId", protectRoute, followUser);
