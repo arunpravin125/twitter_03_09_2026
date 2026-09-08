@@ -12,7 +12,7 @@ export const getNotifications = expressAsyncHandler(async (req, res) => {
 
   const notifications = await Notification.find({ to: user?._id })
     .sort({ created: -1 })
-    .populate("from", "username firstName lastName profilePciture")
+    .populate("from", "username firstName lastName profilePicture")
     .populate("post", "content image")
     .populate("comment", "content");
 
