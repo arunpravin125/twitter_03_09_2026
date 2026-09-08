@@ -69,7 +69,7 @@ app.use("/api", async (req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
-app.use("/api/notification", notificationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((error, req, res, next) => {
   console.error("Unhandled error:", error);

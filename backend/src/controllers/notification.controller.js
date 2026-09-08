@@ -10,13 +10,13 @@ export const getNotifications = expressAsyncHandler(async (req, res) => {
 
   if (!user) return res.status(404).json({ error: "User not found" });
 
-  const notification = await Notification.find({ to: user?._id })
+  const notifications = await Notification.find({ to: user?._id })
     .sort({ created: -1 })
     .populate("from", "username firstName lastName profilePciture")
     .populate("post", "content image")
     .populate("comment", "content");
 
-  res.status(200).json({ notification });
+  res.status(200).json({ notifications });
 });
 
 export const deleteNotification = expressAsyncHandler(async (req, res) => {

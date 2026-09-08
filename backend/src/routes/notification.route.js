@@ -8,4 +8,4 @@ import {
 export const notificationRoutes = express.Router();
 
 notificationRoutes.get("/", protectRoute, getNotifications);
-notificationRoutes.get("/:notificationId", protectRoute, deleteNotification);
+notificationRoutes.delete("/:notificationId", protectRoute, deleteNotification);
