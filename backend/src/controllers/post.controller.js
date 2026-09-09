@@ -7,6 +7,22 @@ import { format } from "path";
 import { Notification } from "../models/notification.model.js";
 import { Comment } from "../models/comment.model.js";
 
+const addRepostCounts = async (posts) => {
+  const postIds = posts.map((post) => post._id);
+  const counts = await Post.aggregate([
+    { $match: { repostedPost: { $in: postIds } } },
+    { $group: { _id: "$repostedPost", count: { $sum: 1 } } },
+  ]);
+  const countByPostId = new Map(
+    counts.map((item) => [item._id.toString(), item.count]),
+  );
+
+  return posts.map((post) => ({
+    ...post.toObject(),
+    repostCount: countByPostId.get(post._id.toString()) || 0,
+  }));
+};
+
 export const getPosts = asyncHandler(async (req, res) => {
   const posts = await Post.find()
     .sort({ createdAt: -1 })
@@ -25,11 +41,9 @@ export const getPosts = asyncHandler(async (req, res) => {
         select: "username firstName lastName profilePicture",
       },
     });
-  if (posts.length > 0) {
-    console.log("post is there");
-  }
+  const postsWithRepostCounts = await addRepostCounts(posts);
 
-  res.status(200).json({ posts });
+  res.status(200).json({ posts: postsWithRepostCounts });
 });
 
 export const getPost = asyncHandler(async (req, res) => {
@@ -46,7 +60,9 @@ export const getPost = asyncHandler(async (req, res) => {
 
   if (!post) return res.status(404).json({ error: "Post not found" });
 
-  res.status(200).json({ post });
+  const [postWithRepostCount] = await addRepostCounts([post]);
+
+  res.status(200).json({ post: postWithRepostCount });
 });
 
 export const getUserPosts = asyncHandler(async (req, res) => {
@@ -72,7 +88,9 @@ export const getUserPosts = asyncHandler(async (req, res) => {
       },
     });
 
-  res.status(200).json({ posts });
+  const postsWithRepostCounts = await addRepostCounts(posts);
+
+  res.status(200).json({ posts: postsWithRepostCounts });
 });
 
 const populatePostDetails = (query) =>
@@ -102,8 +120,9 @@ export const getUserReplies = asyncHandler(async (req, res) => {
   const comments = await Comment.find({ user: user._id }).select("post");
   const postIds = comments.map((comment) => comment.post);
   const posts = await populatePostDetails(Post.find({ _id: { $in: postIds } }));
+  const postsWithRepostCounts = await addRepostCounts(posts);
 
-  res.status(200).json({ posts });
+  res.status(200).json({ posts: postsWithRepostCounts });
 });
 
 export const getUserReposts = asyncHandler(async (req, res) => {
@@ -114,7 +133,9 @@ export const getUserReposts = asyncHandler(async (req, res) => {
   const posts = await populatePostDetails(
     Post.find({ user: user._id, repostedPost: { $ne: null } }),
   );
-  res.status(200).json({ posts });
+  const postsWithRepostCounts = await addRepostCounts(posts);
+
+  res.status(200).json({ posts: postsWithRepostCounts });
 });
 
 export const createPost = asyncHandler(async (req, res) => {
