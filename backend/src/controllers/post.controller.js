@@ -12,6 +12,13 @@ export const getPosts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .populate("user", "username firstName lastName profilePicture")
     .populate({
+      path: "repostedPost",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    })
+    .populate({
       path: "comments",
       populate: {
         path: "user",
@@ -51,6 +58,13 @@ export const getUserPosts = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .populate("user", "username firstName lastName profilePicture")
     .populate({
+      path: "repostedPost",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    })
+    .populate({
       path: "comments",
       populate: {
         path: "user",
@@ -58,6 +72,48 @@ export const getUserPosts = asyncHandler(async (req, res) => {
       },
     });
 
+  res.status(200).json({ posts });
+});
+
+const populatePostDetails = (query) =>
+  query
+    .sort({ createdAt: -1 })
+    .populate("user", "username firstName lastName profilePicture")
+    .populate({
+      path: "repostedPost",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    })
+    .populate({
+      path: "comments",
+      populate: {
+        path: "user",
+        select: "username firstName lastName profilePicture",
+      },
+    });
+
+export const getUserReplies = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  const user = await User.findOne({ username });
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const comments = await Comment.find({ user: user._id }).select("post");
+  const postIds = comments.map((comment) => comment.post);
+  const posts = await populatePostDetails(Post.find({ _id: { $in: postIds } }));
+
+  res.status(200).json({ posts });
+});
+
+export const getUserReposts = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  const user = await User.findOne({ username });
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const posts = await populatePostDetails(
+    Post.find({ user: user._id, repostedPost: { $ne: null } }),
+  );
   res.status(200).json({ posts });
 });
 
@@ -139,6 +195,26 @@ export const likePost = asyncHandler(async (req, res) => {
   res.status(200).json({
     message: isLiked ? "Post unliked successsfully" : "Post liked successfully",
   });
+});
+
+export const repostPost = asyncHandler(async (req, res) => {
+  const { userId } = getAuth(req);
+  const { postId } = req.params;
+  const content =
+    typeof req.body?.content === "string" ? req.body.content.trim() : "";
+  const user = await User.findOne({ clerkId: userId });
+  const originalPost = await Post.findById(postId);
+
+  if (!user || !originalPost)
+    return res.status(404).json({ error: "User or post not found" });
+
+  const repost = await Post.create({
+    user: user._id,
+    content,
+    repostedPost: originalPost._id,
+  });
+
+  res.status(201).json({ repost });
 });
 
 export const deletePost = asyncHandler(async (req, res) => {

@@ -2,6 +2,7 @@ import { User } from "../models/user.model.js";
 import asyncHandler from "express-async-handler";
 import { clerkClient, getAuth } from "@clerk/express";
 import { Notification } from "../models/notification.model.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const getUserProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
@@ -15,8 +16,30 @@ export const getUserProfile = asyncHandler(async (req, res) => {
 
 export const updateProfile = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
+  const updateData = { ...req.body };
+  const profilePictureFile = req.files?.profilePicture?.[0];
+  const bannerImageFile = req.files?.bannerImage?.[0];
 
-  const user = await User.findOneAndUpdate({ clerkId: userId }, req.body, {
+  for (const [field, file] of [
+    ["profilePicture", profilePictureFile],
+    ["bannerImage", bannerImageFile],
+  ]) {
+    if (!file) continue;
+
+    const base64Image = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+    const uploadResponse = await cloudinary.uploader.upload(base64Image, {
+      folder: "social_media_profiles",
+      resource_type: "image",
+      transformation: [
+        { width: 1200, height: 1200, crop: "limit" },
+        { quality: "auto" },
+        { format: "auto" },
+      ],
+    });
+    updateData[field] = uploadResponse.secure_url;
+  }
+
+  const user = await User.findOneAndUpdate({ clerkId: userId }, updateData, {
     new: true,
   });
   if (!user) return res.status(404).json({ error: "User not found" });
