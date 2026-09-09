@@ -14,6 +14,30 @@ export const getUserProfile = asyncHandler(async (req, res) => {
   res.status(200).json({ user });
 });
 
+export const searchUsers = asyncHandler(async (req, res) => {
+  const query = typeof req.query.q === "string" ? req.query.q.trim() : "";
+
+  if (!query) return res.status(200).json({ users: [] });
+
+  const expression = new RegExp(
+    query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+    "i",
+  );
+  const users = await User.find({
+    $or: [
+      { username: expression },
+      { firstName: expression },
+      { lastName: expression },
+    ],
+  })
+    .select("_id username firstName lastName profilePicture bio")
+    .sort({ username: 1 })
+    .limit(20)
+    .lean();
+
+  res.status(200).json({ users });
+});
+
 export const updateProfile = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
   const updateData = { ...req.body };
@@ -85,6 +109,32 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
   res.status(200).json({ user });
 });
 
+export const getRelationshipUsers = asyncHandler(async (req, res) => {
+  const { userId } = getAuth(req);
+  const { type } = req.params;
+  const currentUser = await User.findOne({ clerkId: userId });
+
+  if (!currentUser) return res.status(404).json({ error: "User not found" });
+  if (!["followers", "following"].includes(type)) {
+    return res.status(400).json({ error: "Invalid relationship type" });
+  }
+
+  const relationshipIds = currentUser[type] || [];
+  const users = await User.find({ _id: { $in: relationshipIds } })
+    .select("_id username firstName lastName profilePicture bio")
+    .lean();
+  const followingIds = new Set(
+    currentUser.following.map((id) => id.toString()),
+  );
+
+  res.status(200).json({
+    users: users.map((user) => ({
+      ...user,
+      isFollowing: followingIds.has(user._id.toString()),
+    })),
+  });
+});
+
 export const followUser = asyncHandler(async (req, res) => {
   const { userId } = getAuth(req);
   const { targetUserId } = req.params;
@@ -98,7 +148,9 @@ export const followUser = asyncHandler(async (req, res) => {
   if (!currentUser || !targetUser)
     return res.status(404).json({ error: "User not found" });
 
-  const isFollowing = currentUser.following.includes(targetUserId);
+  const isFollowing = currentUser.following.some(
+    (followingId) => followingId.toString() === targetUserId,
+  );
 
   if (isFollowing) {
     // unfollow

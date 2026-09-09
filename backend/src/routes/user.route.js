@@ -3,6 +3,8 @@ import {
   followUser,
   getCurrentUser,
   getUserProfile,
+  getRelationshipUsers,
+  searchUsers,
   syncUser,
   updateProfile,
 } from "../controllers/user.controller.js";
@@ -13,6 +15,7 @@ export const userRoutes = express.Router();
 
 // public routes
 userRoutes.post("/profile/:username", getUserProfile);
+userRoutes.get("/search", protectRoute, searchUsers);
 
 // private routes
 userRoutes.post(
@@ -26,4 +29,5 @@ userRoutes.post(
 );
 userRoutes.post("/sync", protectRoute, syncUser);
 userRoutes.get("/me", protectRoute, getCurrentUser);
+userRoutes.get("/relationships/:type", protectRoute, getRelationshipUsers);
 userRoutes.post("/follow/:targetUserId", protectRoute, followUser);
